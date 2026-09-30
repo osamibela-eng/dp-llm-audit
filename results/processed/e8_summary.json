@@ -1,0 +1,27 @@
+{
+  "by_arm": {
+    "A1": {
+      "not_falsified": 40
+    },
+    "A2": {
+      "not_falsified": 40
+    }
+  },
+  "measured": {
+    "correct": 40
+  },
+  "per_task": {
+    "e8_a2_count": {
+      "correct": 10
+    },
+    "e8_a2_sum": {
+      "correct": 10
+    },
+    "e8_a2_mean": {
+      "correct": 10
+    },
+    "e8_a2_rr": {
+      "correct": 10
+    }
+  }
+}

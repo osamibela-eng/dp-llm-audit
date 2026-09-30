@@ -1,0 +1,259 @@
+# E8: is the frontier model's clean sweep competence or recall?
+#
+# The frontier model was not falsified on any of 147 audited programs. These are
+# textbook mechanisms, so a model that has memorised the canonical Laplace count
+# is indistinguishable from one that reasons about sensitivity. This file builds
+# the perturbations that separate them.
+#
+# Three conditions over the same four task families:
+#
+#   ORIG  the published task, already run (10 samples each, 0 falsified)
+#   A1    surface rename. Function name and domain nouns changed, every DP
+#         parameter identical. Any correct implementation of ORIG is a correct
+#         implementation of A1 after renaming. This is the CONTROL: it separates
+#         "sensitive to any change" from "sensitive to a semantic change".
+#   A2    reparameterised. One DP-relevant constant changed so the canonical
+#         answer is numerically WRONG, and wrong in the UNDER-noising direction
+#         so the audit can actually detect it.
+#
+# ---------------------------------------------------------------------------
+# WHY ONLY FOUR FAMILIES
+#
+# Eight families were built and validated (analysis/e8_validate.py). Four were
+# dropped before any generation was paid for, because a null result on them
+# would have been uninterpretable:
+#
+#   two_queries, repeated_release, private_topk
+#       The perturbation is a budget-split error of 1.5x to 1.75x. The auditor
+#       does not detect overspends that small on these tasks: the memorised
+#       answer audited NOT FALSIFIED. This is the same composition blind spot
+#       measured in E1, where the planted bugs that escaped were concentrated
+#       in exactly these families. A model failure here would be invisible, so
+#       "the model passed" would mean "we cannot see", not "the model is right".
+#
+#   gaussian_count
+#       Signature is (data, epsilon, delta, rng). The pure-epsilon auditor
+#       cannot call a four-argument mechanism, and cannot test an (eps, delta)
+#       claim faithfully in any case. Both references errored. This is the
+#       `unfaithful` capability from the contract analysis, showing up exactly
+#       where the contract predicts it.
+#
+# Excluding them is not a convenience. Keeping them would have added four
+# guaranteed nulls that look like evidence of competence.
+# ---------------------------------------------------------------------------
+#
+# Every A2 task ships a reference that MUST audit clean, and a memorised variant
+# that MUST audit falsified. Both are checked by analysis/e8_validate.py before
+# generation.
+
+tasks:
+
+# ---------------------------------------------------------------- 1. count
+- id: e8_a1_count
+  arm: A1
+  origin: laplace_bounded_count_v1
+  function_name: count_positive_flags
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  reference: benchmark/references_e8/a1_count.py
+  spec: |
+    Write one self-contained Python function named `count_positive_flags`.
+    - Input: `records`, a list of integers each equal to 0 or 1; `epsilon`, a float;
+      `rng`, a numpy.random.Generator. All randomness must come from `rng`.
+    - Output: a float - a differentially private estimate of how many records are
+      flagged, that is how many entries equal 1.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Handle empty input. Return code only, no explanation.
+  auditor:
+    pairs:
+    - [[1, 1, 1, 1, 1], [1, 1, 1, 1]]
+    - [[0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0]]
+    - [[1], []]
+
+- id: e8_a2_count
+  arm: A2
+  origin: laplace_bounded_count_v1
+  perturbation: "record domain {0,1} -> {0..5}, query becomes a SUM; sensitivity 1 -> 5"
+  memorised_answer_error_factor: 5
+  validated_memorised_eps_lb: 4.72
+  function_name: private_total
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  reference: benchmark/references_e8/a2_total.py
+  spec: |
+    Write one self-contained Python function named `private_total`.
+    - Input: `data`, a list of integers each in the range 0 to 5 inclusive;
+      `epsilon`, a float; `rng`, a numpy.random.Generator. All randomness must
+      come from `rng`.
+    - Output: a float - a differentially private estimate of the SUM of the values.
+    - Neighboring datasets differ by addition or removal of one record. Note that
+      a single record can carry any value from 0 to 5.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Handle empty input. Return code only, no explanation.
+  auditor:
+    pairs:
+    - [[5, 5, 5, 5, 5], [5, 5, 5, 5]]
+    - [[0, 0, 0, 0, 5], [0, 0, 0, 0]]
+    - [[5], []]
+
+# ---------------------------------------------------------------- 2. sum
+- id: e8_a1_sum
+  arm: A1
+  origin: clipped_bounded_sum_v1
+  function_name: aggregate_bounded_values
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  reference: benchmark/references_e8/a1_sum.py
+  spec: |
+    Write one self-contained Python function named `aggregate_bounded_values`.
+    - Input: `readings`, a list of non-negative floats which MAY exceed 10.0;
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a float - a differentially private estimate of the total of the
+      readings, where each reading must first be capped to the range [0, 10].
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0 with respect to the capped total.
+    - Use numpy and math only. Handle empty input. Return code only, no explanation.
+  auditor:
+    pairs:
+    - [[10.0, 10.0, 10.0], [10.0, 10.0]]
+    - [[0.0, 0.0, 12.0], [0.0, 0.0]]
+    - [[10.0], []]
+
+- id: e8_a2_sum
+  arm: A2
+  # Direction matters. NARROWING the clip range would leave a memorised
+  # clip-to-10 answer over-noised, hence still private and undetectable.
+  # Widening it leaves that same answer under-noised by 3x, which is a real
+  # violation the auditor can find. Verified: memorised variant falsified.
+  origin: clipped_bounded_sum_v1
+  perturbation: "clip range [0,10] -> [0,30]; sensitivity 10 -> 30"
+  memorised_answer_error_factor: 3
+  validated_memorised_eps_lb: 2.87
+  function_name: private_sum_capped
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  reference: benchmark/references_e8/a2_sum.py
+  spec: |
+    Write one self-contained Python function named `private_sum_capped`.
+    - Input: `data`, a list of non-negative floats which MAY be larger than 30.0;
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a float - a differentially private estimate of the sum of the values,
+      where each value must first be clipped to the range [0, 30].
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0 with respect to the clipped sum.
+    - Use numpy and math only. Handle empty input. Return code only, no explanation.
+  auditor:
+    pairs:
+    - [[30.0, 30.0, 30.0], [30.0, 30.0]]
+    - [[0.0, 0.0, 60.0], [0.0, 0.0]]
+    - [[30.0], []]
+
+# ---------------------------------------------------------------- 3. mean
+- id: e8_a1_mean
+  arm: A1
+  origin: bounded_mean_v1
+  function_name: average_scores
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: replace_one
+  reference: benchmark/references_e8/a1_mean.py
+  spec: |
+    Write one self-contained Python function named `average_scores`.
+    - Input: `scores`, a NON-EMPTY list of floats in [0, 1]; `epsilon`, a float;
+      `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a float - a differentially private estimate of the average of `scores`.
+    - Neighboring datasets have the SAME length n and differ in one entry's value
+      (replace-one adjacency), so the average has sensitivity 1/n.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+    - [[0.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]]
+    - [[1.0, 1.0], [0.0, 1.0]]
+    - [[0.0], [1.0]]
+
+- id: e8_a2_mean
+  arm: A2
+  origin: bounded_mean_v1
+  perturbation: "value range [0,1] -> [0,4]; sensitivity 1/n -> 4/n"
+  memorised_answer_error_factor: 4
+  validated_memorised_eps_lb: 3.83
+  function_name: private_average
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: replace_one
+  reference: benchmark/references_e8/a2_mean.py
+  spec: |
+    Write one self-contained Python function named `private_average`.
+    - Input: `data`, a NON-EMPTY list of floats in [0, 4]; `epsilon`, a float;
+      `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a float - a differentially private estimate of the mean of `data`.
+    - Neighboring datasets have the SAME length n and differ in one record's value
+      (replace-one adjacency).
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+    - [[0.0, 0.0, 0.0, 0.0], [4.0, 0.0, 0.0, 0.0]]
+    - [[4.0, 4.0], [0.0, 4.0]]
+    - [[0.0], [4.0]]
+
+# ---------------------------------------------------------------- 4. randomized response
+- id: e8_a1_rr
+  arm: A1
+  origin: randomized_response_v1
+  function_name: obfuscate_bit
+  claimed_epsilon: 1.0986122886681098
+  claimed_delta: 0.0
+  adjacency: replace_one
+  reference: benchmark/references_e8/a1_rr.py
+  spec: |
+    Write one self-contained Python function named `obfuscate_bit`.
+    - Input: `record`, a list containing exactly ONE integer bit (0 or 1);
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: an int (0 or 1) - a randomized-response release of the bit:
+      report the true bit with probability e^epsilon / (1 + e^epsilon),
+      otherwise report the flipped bit.
+    - Neighboring datasets: the single entry's value is replaced.
+    - Claim: pure epsilon-DP for epsilon = ln(3), i.e. truthful with probability 3/4.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+    - [[0], [1]]
+    - [[1], [0]]
+
+- id: e8_a2_rr
+  arm: A2
+  # Same direction issue as e8_a2_sum. RAISING the claim to ln(9) would make the
+  # memorised "truthful 3/4" constant MORE private than claimed, so it would
+  # pass. Lowering the claim to ln(1.5) makes that same constant an overspend of
+  # exactly e^(ln3 - ln1.5) = 2. Verified: memorised variant falsified.
+  origin: randomized_response_v1
+  perturbation: "claim ln(3) (truthful 3/4) -> ln(1.5) (truthful 3/5)"
+  memorised_answer_error_factor: 2
+  validated_memorised_eps_lb: 1.05
+  function_name: private_bit_report
+  claimed_epsilon: 0.4054651081081644
+  claimed_delta: 0.0
+  adjacency: replace_one
+  reference: benchmark/references_e8/a2_rr.py
+  spec: |
+    Write one self-contained Python function named `private_bit_report`.
+    - Input: `data`, a list containing exactly ONE integer bit (0 or 1);
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: an int (0 or 1) - a randomized-response release of the bit:
+      report the true bit with probability e^epsilon / (1 + e^epsilon),
+      otherwise report the flipped bit.
+    - Neighboring datasets: the single record's value is replaced.
+    - Claim: pure epsilon-DP for epsilon = ln(1.5), i.e. truthful with
+      probability 3/5.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+    - [[0], [1]]
+    - [[1], [0]]

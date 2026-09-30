@@ -1,0 +1,2 @@
+{"code_sha256": "35ba479524b955d8913e9da80d8e3bb38cf9f3ccabb9ccd7749987ae037a12a0", "task_id": "adaptive_two_step_v1", "model": "deepseek-coder:6.7b", "e2_hits": 2, "confirm_hits": 6, "replicates": 10, "classification": "borderline"}
+{"code_sha256": "83a12200d9ddebe955b33663f94bbba68d58ad5d97a283343497a1c173e9b082", "task_id": "subsampled_count_v1", "model": "deepseek-coder:6.7b", "e2_hits": 1, "confirm_hits": 4, "replicates": 10, "classification": "borderline"}

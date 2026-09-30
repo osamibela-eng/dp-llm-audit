@@ -1,0 +1,27 @@
+You previously wrote the following Python implementation of a differentially
+private mechanism. A black-box statistical auditor found evidence inconsistent
+with its claimed privacy guarantee.
+
+=== TASK SPECIFICATION ===
+{spec}
+
+=== YOUR IMPLEMENTATION ===
+```python
+{code}
+```
+
+=== AUDIT FINDING ===
+Claimed guarantee: ({epsilon}, {delta})-differential privacy under {adjacency} adjacency.
+The auditor found, with statistical confidence:
+- Dataset D:  {d1}
+- Neighboring dataset D': {d2}
+- Output event E: {event}
+- Lower confidence bound on Pr[output of D in E]:  {p1_lb}
+- Upper confidence bound on Pr[output of D' in E]: {p2_ub}
+- These bounds imply a privacy loss of at least {eps_lb} for this event,
+  exceeding the claimed epsilon = {epsilon}.
+
+Revise the implementation so that the claimed guarantee holds. Preserve the
+public interface. Do not weaken the claimed guarantee. All randomness must come
+from `rng`; imports limited to numpy and math.
+Output ONLY a Python code block. No explanation.

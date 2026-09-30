@@ -1,0 +1,46 @@
+{
+  "paired": 50,
+  "arms": {
+    "R2 (feedback)": {
+      "repaired": 9,
+      "n": 50,
+      "per_attempt": {
+        "1": [
+          50,
+          4
+        ],
+        "2": [
+          33,
+          4
+        ],
+        "3": [
+          26,
+          1
+        ]
+      }
+    },
+    "R0 (control)": {
+      "repaired": 9,
+      "n": 50,
+      "per_attempt": {
+        "1": [
+          50,
+          7
+        ],
+        "2": [
+          29,
+          2
+        ],
+        "3": [
+          24,
+          0
+        ]
+      }
+    }
+  },
+  "mcnemar": {
+    "only_feedback": 3,
+    "only_control": 3,
+    "p": 1.0
+  }
+}

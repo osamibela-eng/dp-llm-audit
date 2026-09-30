@@ -1,0 +1,89 @@
+{"task": "laplace_bounded_count_v1", "pid": 14816, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "laplace_bounded_count_v1", "pid": 14816, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "laplace_bounded_count_v1", "pid": 29592, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "laplace_bounded_count_v1", "pid": 29592, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "laplace_bounded_count_v1", "pid": 14816, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "laplace_bounded_count_v1", "pid": 29592, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "clipped_bounded_sum_v1", "pid": 34504, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "clipped_bounded_sum_v1", "pid": 34504, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "clipped_bounded_sum_v1", "pid": 12708, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "clipped_bounded_sum_v1", "pid": 12708, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "clipped_bounded_sum_v1", "pid": 12708, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "clipped_bounded_sum_v1", "pid": 34504, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "clipped_bounded_sum_v1", "pid": 12708, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "bounded_mean_v1", "pid": 16672, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "bounded_mean_v1", "pid": 10976, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "bounded_mean_v1", "pid": 16672, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "bounded_mean_v1", "pid": 10976, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1.0"}]}
+{"task": "bounded_mean_v1", "pid": 16672, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "bounded_mean_v1", "pid": 10976, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "bounded_mean_v1", "pid": 16672, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "bounded_mean_v1", "pid": 10976, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "categorical_histogram_v1", "pid": 11592, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "record_type", "detail": "record 0 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 1 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 2 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 3 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 4 = 1 is not categorical"}]}
+{"task": "randomized_response_v1", "pid": 13248, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "size", "detail": "length 5 > max_size 1"}]}
+{"task": "randomized_response_v1", "pid": 13248, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "size", "detail": "length 5 > max_size 1"}]}
+{"task": "randomized_response_v1", "pid": 24000, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "size", "detail": "length 5 > max_size 1"}]}
+{"task": "randomized_response_v1", "pid": 24000, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "size", "detail": "length 5 > max_size 1"}, {"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "randomized_response_v1", "pid": 13248, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "size", "detail": "length 5 > max_size 1"}]}
+{"task": "randomized_response_v1", "pid": 24000, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "size", "detail": "length 5 > max_size 1"}, {"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "randomized_response_v1", "pid": 13248, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "size", "detail": "length 5 > max_size 1"}, {"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "gaussian_bounded_count_v1", "pid": 1336, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "two_queries_split_budget_v1", "pid": 3696, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "two_queries_split_budget_v1", "pid": 23592, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "two_queries_split_budget_v1", "pid": 3696, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "two_queries_split_budget_v1", "pid": 23592, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1.0"}]}
+{"task": "two_queries_split_budget_v1", "pid": 3696, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+
+{"task": "two_queries_split_budget_v1", "pid": 3696, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1.0"}]}
+{"task": "two_queries_split_budget_v1", "pid": 23592, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1.0"}]}
+{"task": "repeated_release_v1", "pid": 20756, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "repeated_release_v1", "pid": 20756, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "repeated_release_v1", "pid": 7380, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "repeated_release_v1", "pid": 7380, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "repeated_release_v1", "pid": 20756, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "repeated_release_v1", "pid": 7380, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "repeated_release_v1", "pid": 20756, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "repeated_release_v1", "pid": 7380, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "report_noisy_max_v1", "pid": 9436, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "record_type", "detail": "record 0 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 1 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 2 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 3 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 4 = 1 is not categorical"}]}
+{"task": "exponential_mechanism_v1", "pid": 29704, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "record_type", "detail": "record 0 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 1 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 2 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 3 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 4 = 1 is not categorical"}]}
+{"task": "private_topk_v1", "pid": 3268, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "record_type", "detail": "record 0 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 1 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 2 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 3 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 4 = 1 is not categorical"}]}
+{"task": "private_topk_v1", "pid": 3268, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "record_type", "detail": "record 0 = 2 is not categorical"}, {"kind": "record_type", "detail": "record 1 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 2 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 3 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 4 = 1 is not categorical"}]}
+{"task": "private_topk_v1", "pid": 25500, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "record_type", "detail": "record 0 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 1 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 2 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 3 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 4 = 1 is not categorical"}]}
+{"task": "private_topk_v1", "pid": 25500, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "record_type", "detail": "record 0 = 0 is not categorical"}, {"kind": "record_type", "detail": "record 1 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 2 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 3 = 1 is not categorical"}, {"kind": "record_type", "detail": "record 4 = 1 is not categorical"}]}
+{"task": "above_threshold_v1", "pid": 35524, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "above_threshold_v1", "pid": 35524, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "above_threshold_v1", "pid": 32396, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "above_threshold_v1", "pid": 32396, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "above_threshold_v1", "pid": 35524, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "above_threshold_v1", "pid": 32396, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "above_threshold_v1", "pid": 35524, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "adaptive_two_step_v1", "pid": 26888, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "adaptive_two_step_v1", "pid": 26888, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "adaptive_two_step_v1", "pid": 18260, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "adaptive_two_step_v1", "pid": 18260, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1.0"}]}
+{"task": "adaptive_two_step_v1", "pid": 26888, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "adaptive_two_step_v1", "pid": 18260, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "adaptive_two_step_v1", "pid": 26888, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "validated_clipped_count_v1", "pid": 5212, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "validated_clipped_count_v1", "pid": 32320, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "validated_clipped_count_v1", "pid": 5212, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "validated_clipped_count_v1", "pid": 32320, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "validated_clipped_count_v1", "pid": 32320, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "validated_clipped_count_v1", "pid": 32320, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "validated_clipped_count_v1", "pid": 5212, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "empty_dataset_count_v1", "pid": 21976, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "empty_dataset_count_v1", "pid": 21976, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "empty_dataset_count_v1", "pid": 22272, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "empty_dataset_count_v1", "pid": 22272, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "empty_dataset_count_v1", "pid": 21976, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "empty_dataset_count_v1", "pid": 22272, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "empty_dataset_count_v1", "pid": 21976, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "empty_dataset_count_v1", "pid": 22272, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "subsampled_count_v1", "pid": 32576, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "subsampled_count_v1", "pid": 2880, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "subsampled_count_v1", "pid": 2880, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "subsampled_count_v1", "pid": 32576, "probe": [0, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "subsampled_count_v1", "pid": 32576, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "subsampled_count_v1", "pid": 2880, "probe": [1, 1, 1, 1, 1], "probe_len": 5, "violations": []}
+{"task": "subsampled_count_v1", "pid": 32576, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}
+{"task": "subsampled_count_v1", "pid": 2880, "probe": [2, 1, 1, 1, 1], "probe_len": 5, "violations": [{"kind": "value_domain", "detail": "record 0 = 2 above 1"}]}

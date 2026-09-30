@@ -1,0 +1,15 @@
+You previously wrote the following Python implementation of a differentially
+private mechanism. The original task specification is repeated below. Review
+your implementation carefully and revise it if anything is wrong.
+
+=== TASK SPECIFICATION ===
+{spec}
+
+=== YOUR IMPLEMENTATION ===
+```python
+{code}
+```
+
+Requirements are unchanged: one top-level function named `{function_name}`,
+all randomness from the provided `rng`, imports limited to numpy and math.
+Output ONLY a Python code block. No explanation.
