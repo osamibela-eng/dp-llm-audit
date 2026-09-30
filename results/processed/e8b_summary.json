@@ -1,0 +1,75 @@
+{
+  "by_arm": {
+    "A2": {
+      "auditor_error": 6,
+      "falsified": 75,
+      "runtime_fail": 14,
+      "auditor_unsupported": 2,
+      "not_falsified": 21,
+      "syntax_fail": 1,
+      "semantic_fail": 1
+    },
+    "A1": {}
+  },
+  "measured": {
+    "unmeasurable": 36,
+    "under_noised": 32,
+    "other": 2,
+    "over_noised": 16,
+    "correct": 23,
+    "memorised": 11
+  },
+  "per_task": {
+    "e8_a2_count": {
+      "unmeasurable": 14,
+      "under_noised": 8,
+      "over_noised": 4,
+      "memorised": 3,
+      "correct": 1
+    },
+    "e8_a2_sum": {
+      "under_noised": 15,
+      "unmeasurable": 9,
+      "over_noised": 1,
+      "correct": 3,
+      "memorised": 2
+    },
+    "e8_a2_mean": {
+      "unmeasurable": 9,
+      "over_noised": 3,
+      "under_noised": 9,
+      "memorised": 6,
+      "correct": 3
+    },
+    "e8_a2_rr": {
+      "other": 2,
+      "over_noised": 8,
+      "correct": 16,
+      "unmeasurable": 4
+    }
+  },
+  "per_model": {
+    "codellama:7b": {
+      "unmeasurable": 25,
+      "under_noised": 7,
+      "other": 1,
+      "over_noised": 5,
+      "correct": 2
+    },
+    "deepseek-coder:6.7b": {
+      "unmeasurable": 7,
+      "over_noised": 9,
+      "under_noised": 9,
+      "memorised": 7,
+      "correct": 7,
+      "other": 1
+    },
+    "qwen2.5-coder:7b": {
+      "under_noised": 16,
+      "unmeasurable": 4,
+      "correct": 14,
+      "over_noised": 2,
+      "memorised": 4
+    }
+  }
+}

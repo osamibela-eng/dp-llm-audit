@@ -1,0 +1,15 @@
+# Core (verified working with Python 3.11, numpy 2.x)
+numpy>=1.26
+scipy>=1.11
+pandas>=2.0
+pyyaml>=6.0
+pytest>=8.0
+matplotlib>=3.8
+requests>=2.31
+
+# Optional: StatDP auditor (clone separately, see auditors/AUDITOR_NOTES.md)
+# numba>=0.60
+# tqdm>=4.66
+
+# Optional: local model serving
+# ollama (install separately: https://ollama.com)

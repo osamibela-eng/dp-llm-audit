@@ -1,0 +1,198 @@
+# Machine-readable audit contracts, one per task.
+#
+# WHY THIS FILE EXISTS
+#
+# An empirical DP auditor decides whether a program violates a claim by probing
+# it with inputs. Which inputs are admissible is part of the claim, not part of
+# the auditor. In v1 this was implicit: our auditor used hand-designed pairs that
+# happened to respect each task's domain, and StatDP generated its own and did
+# not. When StatDP flagged the *correct* randomized-response reference, the cause
+# was a record outside {0,1}, not a defect in StatDP.
+#
+# That episode is only an anecdote until the domain is written down in a form a
+# tool can check. This file writes it down.
+#
+# Each contract is DECLARED from the task specification, not inferred from the
+# reference implementation. If a contract and a reference disagree, the contract
+# is what the task promised and the reference is what we wrote; that disagreement
+# would itself be a finding.
+#
+# FIELDS
+#   record_type   int | float | categorical | any
+#   domain        for int/float: [lo, hi] inclusive, or null if unbounded
+#                 for categorical: the list of admissible labels
+#                 for any: null (the task accepts arbitrary values by design)
+#   ignored_ok    true if labels outside `domain` must be ignored rather than
+#                 rejected (the task says so explicitly)
+#   min_size      smallest admissible dataset length
+#   max_size      largest admissible dataset length, or null
+#   adjacency     add_remove_one | replace_one
+#   output_type   what a conforming release looks like
+#   notes         anything a probe generator must know that the fields cannot say
+
+version: 2
+tasks:
+
+  laplace_bounded_count_v1:
+    record_type: int
+    domain: [0, 1]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: float
+
+  clipped_bounded_sum_v1:
+    record_type: float
+    # Values MAY exceed the clipping bound of 10; that is the point of the task.
+    # Only non-negativity is contractual.
+    domain: [0.0, null]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: float
+    notes: >
+      Records may exceed 10.0. The mechanism must clip to [0, 10] internally, so
+      a probe value of 250.0 is admissible input, not an out-of-domain probe.
+
+  bounded_mean_v1:
+    record_type: float
+    domain: [0.0, 1.0]
+    min_size: 1
+    max_size: null
+    adjacency: replace_one
+    output_type: float
+    notes: >
+      The spec says NON-EMPTY, so min_size is 1 and the empty dataset is not an
+      admissible probe. Under replace_one the two sides of a pair must have equal
+      length.
+
+  categorical_histogram_v1:
+    record_type: categorical
+    domain: ["A", "B", "C"]
+    ignored_ok: true
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: dict
+    notes: >
+      Labels outside {A,B,C} may appear and must be ignored without error, so a
+      probe containing "Z" is admissible. The OUTPUT keys are still exactly
+      {A,B,C}.
+
+  randomized_response_v1:
+    record_type: int
+    domain: [0, 1]
+    min_size: 1
+    max_size: 1
+    adjacency: replace_one
+    output_type: int
+    notes: >
+      Exactly one record. This is the contract StatDP violated in v1: it produced
+      a record of 2, and the mechanism's outputs then had disjoint support. Both
+      the value domain and the size bounds are load-bearing here.
+
+  gaussian_bounded_count_v1:
+    record_type: int
+    domain: [0, 1]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: float
+    notes: >
+      Four-argument signature (data, epsilon, delta, rng). Claims (eps, delta)-DP,
+      so a pure-eps auditor cannot test it faithfully; auditor capability
+      prediction (E3) must return unsupported-for-pure-eps here.
+
+  two_queries_split_budget_v1:
+    record_type: float
+    domain: [0.0, 1.0]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: tuple
+
+  repeated_release_v1:
+    record_type: int
+    domain: [0, 1]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: list
+    notes: Returns exactly four floats.
+
+  report_noisy_max_v1:
+    record_type: categorical
+    domain: ["A", "B", "C", "D"]
+    ignored_ok: false
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: str
+
+  exponential_mechanism_v1:
+    record_type: categorical
+    domain: ["A", "B", "C", "D"]
+    ignored_ok: false
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: str
+
+  private_topk_v1:
+    record_type: categorical
+    domain: ["A", "B", "C", "D"]
+    ignored_ok: false
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: list
+    notes: Ordered list of labels; order carries information and must be preserved.
+
+  above_threshold_v1:
+    record_type: int
+    domain: [0, 1]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: int
+    notes: Releases an index in {0, 1, 2, 3}, never a query value.
+
+  adaptive_two_step_v1:
+    record_type: float
+    domain: [0.0, 1.0]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: tuple
+
+  validated_clipped_count_v1:
+    record_type: any
+    domain: null
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: float
+    notes: >
+      Arbitrary Python values are admissible BY DESIGN: the task is about
+      validating them without leaking. No probe input can be out-of-domain here,
+      which makes this the control case for E1: the generic arm should produce no
+      contract violations on this task.
+
+  empty_dataset_count_v1:
+    record_type: int
+    domain: [0, 1]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: float
+    notes: >
+      The empty dataset is explicitly admissible and privacy-relevant, since []
+      and [1] are neighbours under add_remove_one.
+
+  subsampled_count_v1:
+    record_type: int
+    domain: [0, 1]
+    min_size: 0
+    max_size: null
+    adjacency: add_remove_one
+    output_type: float

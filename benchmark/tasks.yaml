@@ -1,0 +1,498 @@
+# dp-code-audit benchmark: 16 task records (single source of truth).
+#
+# Fields:
+#   spec            -> verbatim body of the generation prompt (keep frozen once experiments start)
+#   auditor.pairs   -> concrete neighboring dataset pairs used by auditors
+#   reference/bugs  -> populated for starter tasks; fill the rest in Week 3
+#   expected_auditability -> honest prediction; revise after calibration
+#
+# Global conventions (also stated in every prompt):
+#   - signature: def <function_name>(data: list, epsilon: float, rng) -> <output>
+#   - rng is a numpy.random.Generator; ALL randomness must come from rng
+#   - allowed imports: numpy, math only
+#   - code only, no explanation
+
+version: 1
+adjacency_definitions:
+  add_remove_one: "D and D' differ by the addition or removal of exactly one record"
+  replace_one: "D and D' have equal length and differ in exactly one record's value"
+
+tasks:
+
+# ============================================================ TIER 1: BASIC (6)
+
+- id: laplace_bounded_count_v1
+  tier: 1
+  family: count
+  function_name: private_count
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_count`.
+    - Input: `data`, a list of integers each equal to 0 or 1; `epsilon`, a float;
+      `rng`, a numpy.random.Generator. All randomness must come from `rng`.
+    - Output: a float - a differentially private estimate of the number of 1s in `data`.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Handle empty input. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1,1,1,1,1], [1,1,1,1]]
+      - [[0,0,0,0,0,1], [0,0,0,0,0]]
+      - [[1], []]
+  common_bugs: [wrong Laplace scale, no noise, noise from np.random instead of rng]
+  expected_auditability: auditable
+  reference: benchmark/references/laplace_count.py
+  bugs: benchmark/known_bugs/laplace_count_bugs.py
+  tests: benchmark/tests/test_laplace_count.py
+
+- id: clipped_bounded_sum_v1
+  tier: 1
+  family: sum
+  function_name: private_sum
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_sum`.
+    - Input: `data`, a list of non-negative floats which MAY be larger than 10.0;
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a float - a differentially private estimate of the sum of the values,
+      where each value must first be clipped to the range [0, 10].
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0 with respect to the clipped sum.
+    - Use numpy and math only. Handle empty input. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[5.0, 5.0, 5.0], [5.0, 5.0]]
+      - [[100.0], []]            # exposes missing clipping
+      - [[10.0, 3.5], [3.5]]
+  common_bugs: [no clipping, count sensitivity instead of B, deterministic empty-case]
+  expected_auditability: auditable
+  reference: benchmark/references/clipped_sum.py
+  bugs: benchmark/known_bugs/clipped_sum_bugs.py
+  tests: benchmark/tests/test_clipped_sum.py
+
+- id: bounded_mean_v1
+  tier: 1
+  family: mean
+  function_name: private_mean
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: replace_one
+  spec: |
+    Write one self-contained Python function named `private_mean`.
+    - Input: `data`, a NON-EMPTY list of floats in [0, 1]; `epsilon`, a float;
+      `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a float - a differentially private estimate of the mean of `data`.
+    - Neighboring datasets have the SAME length n and differ in one record's value
+      (replace-one adjacency), so the mean has sensitivity 1/n.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]]
+      - [[1.0, 1.0], [1.0, 0.0]]
+  common_bugs: [uses sum sensitivity, wrong n, clips after averaging]
+  expected_auditability: auditable
+  reference: benchmark/references/bounded_mean.py
+  bugs: benchmark/known_bugs/bounded_mean_bugs.py
+  tests: benchmark/tests/test_bounded_mean.py
+
+- id: categorical_histogram_v1
+  tier: 1
+  family: histogram
+  function_name: private_histogram
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_histogram`.
+    - Input: `data`, a list of category labels, each one of "A", "B", or "C"
+      (other labels may appear and must be ignored without error);
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a dict with keys "A", "B", "C" mapping to float noisy counts.
+      Every bin must receive noise, including bins with zero count.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Handle empty input. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [["A","A","B","C"], ["A","A","B"]]     # removes the only C -> support leak
+      - [["A"], []]
+      - [["A","B","B"], ["A","B","B","C"]]
+  common_bugs: [zero bins left exact, per-bin budget split backwards, raises on unknown label]
+  expected_auditability: auditable
+  reference: benchmark/references/categorical_histogram.py
+  bugs: benchmark/known_bugs/categorical_histogram_bugs.py
+  tests: benchmark/tests/test_categorical_histogram.py
+
+- id: randomized_response_v1
+  tier: 1
+  family: local_dp
+  function_name: randomized_response
+  claimed_epsilon: 1.0986122886681098   # ln(3)
+  claimed_delta: 0.0
+  adjacency: replace_one
+  spec: |
+    Write one self-contained Python function named `randomized_response`.
+    - Input: `data`, a list containing exactly ONE integer bit (0 or 1);
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: an int (0 or 1) - a randomized-response release of the bit:
+      report the true bit with probability e^epsilon / (1 + e^epsilon),
+      otherwise report the flipped bit.
+    - Neighboring datasets: the single record's value is replaced.
+    - Claim: pure epsilon-DP for epsilon = ln(3), i.e. truthful with probability 3/4.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1], [0]]
+  common_bugs: [wrong flip probability, deterministic passthrough, flipped formula]
+  expected_auditability: auditable
+  reference: benchmark/references/randomized_response.py
+  bugs: benchmark/known_bugs/randomized_response_bugs.py
+  tests: benchmark/tests/test_randomized_response.py
+
+- id: gaussian_bounded_count_v1
+  tier: 1
+  family: gaussian
+  function_name: private_count_gaussian
+  claimed_epsilon: 1.0
+  claimed_delta: 1.0e-05
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_count_gaussian`.
+    - Input: `data`, a list of integers each 0 or 1; `epsilon`, a float; `delta`,
+      a float; `rng`, a numpy.random.Generator (sole source of randomness).
+      Signature: private_count_gaussian(data, epsilon, delta, rng).
+    - Output: a float - a differentially private count of the 1s using the
+      GAUSSIAN mechanism with a correctly calibrated standard deviation.
+    - Neighboring datasets differ by addition or removal of one record (sensitivity 1).
+    - Claim: (epsilon, delta)-DP for epsilon = 1.0, delta = 1e-5. State the
+      calibration you use in a code comment (e.g. classical or analytic Gaussian).
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1,1,1,1,1], [1,1,1,1]]
+    note: >
+      (eps,delta) auditing is weaker for threshold auditors; expect only gross
+      miscalibrations (e.g. sigma for epsilon=10) to be falsified. Track as a
+      coverage finding, not a failure.
+  common_bugs: [pure-DP sigma formula, ignores delta, sigma off by sqrt(2 ln(1.25/delta))]
+  expected_auditability: partially_auditable
+  reference: benchmark/references/gaussian_count.py
+  bugs: benchmark/known_bugs/gaussian_count_bugs.py
+  tests: benchmark/tests/test_gaussian_count.py
+
+# ============================================ TIER 2: COMPOSITION & SELECTION (6)
+
+- id: two_queries_split_budget_v1
+  tier: 2
+  family: composition
+  function_name: private_count_and_sum
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_count_and_sum`.
+    - Input: `data`, a list of floats in [0, 1]; `epsilon`, a float;
+      `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a tuple (noisy_count, noisy_sum) of two floats, where noisy_count
+      estimates len(data) and noisy_sum estimates sum(data) (values already in [0,1],
+      so the sum has sensitivity 1 under add/remove).
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: the TOTAL release (both numbers together) is pure epsilon-DP for
+      epsilon = 1.0. Choose the per-query budgets accordingly.
+    - Use numpy and math only. Handle empty input. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1.0, 1.0, 1.0], [1.0, 1.0]]
+      - [[0.5], []]
+  common_bugs: [spends full epsilon on each query, splits sensitivity instead of budget]
+  expected_auditability: auditable
+  reference: benchmark/references/two_queries.py
+  bugs: benchmark/known_bugs/two_queries_bugs.py
+  tests: benchmark/tests/test_two_queries.py
+
+- id: repeated_release_v1
+  tier: 2
+  family: composition
+  function_name: private_repeated_count
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_repeated_count`.
+    - Input: `data`, a list of integers each 0 or 1; `epsilon`, a float;
+      `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a list of FOUR floats - four independent noisy releases of the
+      count of 1s (fresh noise each time), e.g. for four different analysts.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: the TOTAL release of all four numbers is pure epsilon-DP for
+      epsilon = 1.0 under sequential composition.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1,1,1,1,1], [1,1,1,1]]
+      - [[1], []]
+  common_bugs: [uses full epsilon per release (4x overspend), reuses one noise draw]
+  expected_auditability: auditable
+  reference: benchmark/references/repeated_release.py
+  bugs: benchmark/known_bugs/repeated_release_bugs.py
+  tests: benchmark/tests/test_repeated_release.py
+
+- id: report_noisy_max_v1
+  tier: 2
+  family: selection
+  function_name: private_argmax
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_argmax`.
+    - Input: `data`, a list of category labels from {"A","B","C","D"};
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a single string - the label of the (privately selected) most
+      frequent category, using the Report Noisy Max mechanism with correctly
+      calibrated noise added to each of the four counts BEFORE selection.
+      Release ONLY the label, never the counts.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Handle empty input and ties. Return code only.
+  auditor:
+    pairs:
+      # CRITICAL pair-design lesson (found during starter-kit calibration):
+      # a pair only exposes a deterministic argmax if removing one record FLIPS
+      # the winner. Ties broken toward "A" hide the bug if "A" wins both sides.
+      - [["A","A","B","B","B"], ["A","A","B","B"]]   # winner flips B -> A(tie)
+      - [["A","A","A","B","B","C","C"], ["A","A","B","B","C","C"]]
+      - [["A"], []]
+  common_bugs: [noise after argmax, shared noise draw, half scale, returns counts too]
+  expected_auditability: auditable
+  reference: benchmark/references/report_noisy_max.py
+  bugs: benchmark/known_bugs/report_noisy_max_bugs.py
+  tests: benchmark/tests/test_report_noisy_max.py
+
+- id: exponential_mechanism_v1
+  tier: 2
+  family: selection
+  function_name: private_select
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_select`.
+    - Input: `data`, a list of category labels from {"A","B","C","D"};
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a single string - a category selected with the EXPONENTIAL
+      mechanism, using utility u(D, c) = count of c in D (sensitivity 1).
+      Sample c with probability proportional to exp(epsilon * u / 2).
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Guard against numerical overflow. Return code only.
+  auditor:
+    pairs:
+      - [["A","A","A","B"], ["A","A","B"]]
+      - [["A"], []]
+      # Added after calibration. The two pairs above never flip the argmax, so a
+      # DETERMINISTIC selection bug was invisible (AUDITOR_NOTES section 5).
+      # Removing one record here changes the winner: measured eps_lb 9.21 on the
+      # argmax variant, while the reference stays at 0.43.
+      - [["B","C"], ["C"]]
+      # Near-tie between two high-utility categories, which exposes the missing
+      # factor-of-2 calibration error (measured eps_lb 1.22 against a claim of 1.0).
+      - [["A","A","A","A","B","C","C"], ["A","A","A","A","C","C"]]
+  common_bugs: [missing factor 2, softmax over normalized utilities, argmax of weights]
+  expected_auditability: auditable
+  reference: benchmark/references/exponential_mechanism.py
+  bugs: benchmark/known_bugs/exponential_mechanism_bugs.py
+  tests: benchmark/tests/test_exponential_mechanism.py
+
+- id: private_topk_v1
+  tier: 2
+  family: selection_composition
+  function_name: private_top2
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_top2`.
+    - Input: `data`, a list of category labels from {"A","B","C","D"};
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a list of TWO DISTINCT strings - the two most frequent categories,
+      selected privately by running Report Noisy Max twice ("peeling"): select a
+      winner, remove it from the candidate set, select again. Split the budget
+      correctly across the two rounds.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: the total release is pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [["A","A","A","B","B","C"], ["A","A","B","B","C"]]
+      - [["A","B"], ["A"]]
+  common_bugs: [full budget per round, reuses first-round noise, sorts true counts]
+  expected_auditability: auditable
+  reference: benchmark/references/private_topk.py
+  bugs: benchmark/known_bugs/private_topk_bugs.py
+  tests: benchmark/tests/test_private_topk.py
+
+- id: above_threshold_v1
+  tier: 2
+  family: svt
+  function_name: above_threshold
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `above_threshold`.
+    - Input: `data`, a list of integers each 0 or 1; `epsilon`, a float;
+      `rng`, a numpy.random.Generator (sole source of randomness).
+    - The function evaluates THREE fixed counting queries on `data`, in order:
+      q1 = count of 1s, q2 = count of 0s, q3 = len(data); each has sensitivity 1
+      under add/remove-one adjacency. Public threshold T = 4.
+    - Output: an int in {1, 2, 3} - the index of the FIRST query whose value
+      privately exceeds T, or 0 if none does. Use the AboveThreshold (sparse
+      vector) template: add Laplace noise to the threshold once, add fresh
+      Laplace noise to each query answer, stop at the first noisy crossing,
+      and calibrate both noise scales so the whole procedure is epsilon-DP.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1,1,1,1,1,0,0], [1,1,1,1,0,0]]
+      - [[1,1,1,1], [1,1,1,1,1]]
+      # Added after a search over neighbouring pairs: the strongest separator
+      # found for the un-noised-query variant (eps_lb 1.04 against a claim of
+      # 1.0). Even the best pair barely clears the claim - see AUDITOR_NOTES
+      # section 9 for why this task instance caps detectability.
+      - [[1,1,0,0,0], [1,1,0,0,0,0]]
+  common_bugs: [no noise on queries, fresh threshold noise per query, wrong scales, answers value not index]
+  expected_auditability: auditable
+  reference: benchmark/references/above_threshold.py
+  bugs: benchmark/known_bugs/above_threshold_bugs.py
+  tests: benchmark/tests/test_above_threshold.py
+
+# ================================================ TIER 3: ADAPTIVE & EDGE (4)
+
+- id: adaptive_two_step_v1
+  tier: 3
+  family: adaptive_composition
+  function_name: private_adaptive_release
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_adaptive_release`.
+    - Input: `data`, a list of floats in [0, 1]; `epsilon`, a float;
+      `rng`, a numpy.random.Generator (sole source of randomness).
+    - Step 1: release a noisy count of records with value >= 0.5.
+    - Step 2: IF the noisy count from step 1 is >= 3, additionally release a noisy
+      sum of the values (sensitivity 1); otherwise release a noisy count of
+      records with value < 0.5. Fresh noise in step 2.
+    - Output: a tuple (step1_release, step2_release) of two floats.
+    - The second query DEPENDS on the first noisy output (adaptive composition);
+      the TOTAL release must be pure epsilon-DP for epsilon = 1.0.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[0.9,0.9,0.9,0.9,0.1], [0.9,0.9,0.9,0.1]]
+      - [[0.6,0.6], [0.6]]
+  common_bugs: [ignores adaptivity in accounting, full budget per step, branches on RAW count]
+  expected_auditability: auditable
+  reference: benchmark/references/adaptive_two_step.py
+  bugs: benchmark/known_bugs/adaptive_two_step_bugs.py
+  tests: benchmark/tests/test_tier3.py
+
+- id: validated_clipped_count_v1
+  tier: 3
+  family: edge_case
+  function_name: private_valid_count
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_valid_count`.
+    - Input: `data`, a list of arbitrary Python values (ints, floats, strings,
+      None may all appear); `epsilon`, a float; `rng`, a numpy.random.Generator
+      (sole source of randomness).
+    - Output: a float - a differentially private count of records that are valid
+      integers in the range [0, 100]. Invalid records are simply not counted.
+      The function must NEVER raise an exception based on record contents and
+      must not print or log anything about them.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[5, "oops", 7], [5, 7]]          # removing the invalid record
+      - [[5, None], [5]]
+      - [[3], []]
+  common_bugs: [raises on invalid record (deterministic leak), counts invalid records, validates by exception with data-dependent message]
+  expected_auditability: auditable
+  reference: benchmark/references/validated_count.py
+  bugs: benchmark/known_bugs/validated_count_bugs.py
+  tests: benchmark/tests/test_tier3.py
+
+- id: empty_dataset_count_v1
+  tier: 3
+  family: edge_case
+  function_name: private_count_safe
+  claimed_epsilon: 1.0
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_count_safe`.
+    - Input: `data`, a list of integers each 0 or 1, WHICH MAY BE EMPTY;
+      `epsilon`, a float; `rng`, a numpy.random.Generator (sole source of randomness).
+    - Output: a float - a differentially private count of the 1s. The empty
+      dataset must be handled by the SAME noisy release path as any other
+      dataset: no special-cased deterministic output, no exception.
+    - Neighboring datasets differ by addition or removal of one record; note that
+      [] and [1] are neighbors, so the empty case is privacy-relevant.
+    - Claim: pure epsilon-DP for epsilon = 1.0.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1], []]
+      - [[0], []]
+  common_bugs: [returns 0 or raises on empty, returns int (rounds noise) only when empty]
+  expected_auditability: auditable
+  reference: benchmark/references/empty_dataset_count.py
+  bugs: benchmark/known_bugs/empty_dataset_count_bugs.py
+  tests: benchmark/tests/test_tier3.py
+
+- id: subsampled_count_v1
+  tier: 3
+  family: amplification
+  function_name: private_subsampled_count
+  claimed_epsilon: 0.5
+  claimed_delta: 0.0
+  adjacency: add_remove_one
+  spec: |
+    Write one self-contained Python function named `private_subsampled_count`.
+    - Input: `data`, a list of integers each 0 or 1; `epsilon`, a float;
+      `rng`, a numpy.random.Generator (sole source of randomness).
+    - Procedure: first include each record independently with probability
+      q = 0.5 (Poisson subsampling using `rng`), then release a noisy count of
+      1s among the sampled records using the Laplace mechanism with a base
+      budget eps0 of your choice.
+    - Output: a float.
+    - Claim: pure epsilon-DP for epsilon = 0.5 for the OVERALL procedure via
+      privacy amplification by subsampling: eps = ln(1 + q*(e^{eps0} - 1)).
+      Choose and state eps0 in a code comment so the claim holds.
+    - Neighboring datasets differ by addition or removal of one record.
+    - Use numpy and math only. Return code only, no explanation.
+  auditor:
+    pairs:
+      - [[1,1,1,1,1,1], [1,1,1,1,1]]
+    note: >
+      Amplification claims are hard for threshold auditors at these budgets;
+      expect 'not_falsified' even for moderately wrong eps0. Track as a
+      coverage finding.
+  common_bugs: [claims amplified eps with eps0 = eps, samples without rng, deterministic subsample]
+  expected_auditability: partially_auditable
+  reference: benchmark/references/subsampled_count.py
+  bugs: benchmark/known_bugs/subsampled_count_bugs.py
+  tests: benchmark/tests/test_tier3.py

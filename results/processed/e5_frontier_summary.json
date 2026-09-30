@@ -1,0 +1,14 @@
+{
+  "model": "gemini-3.6-flash",
+  "generated": 160,
+  "executable": 148,
+  "functional": 147,
+  "audited": 147,
+  "falsified": 0,
+  "outcomes": {
+    "not_falsified": 147,
+    "timeout": 2,
+    "semantic_fail": 1,
+    "syntax_fail": 10
+  }
+}

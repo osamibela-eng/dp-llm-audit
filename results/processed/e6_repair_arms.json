@@ -1,0 +1,26 @@
+{
+  "paired_programs": 50,
+  "repaired": {
+    "R0": 2,
+    "R2": 3,
+    "R3": 3
+  },
+  "mcnemar": {
+    "R2_vs_R0": {
+      "only_left": 3,
+      "only_right": 2,
+      "p": 1.0
+    },
+    "R3_vs_R0": {
+      "only_left": 1,
+      "only_right": 0,
+      "p": 1.0
+    },
+    "R3_vs_R2": {
+      "only_left": 3,
+      "only_right": 3,
+      "p": 1.0
+    }
+  },
+  "no_signal_programs": 1
+}

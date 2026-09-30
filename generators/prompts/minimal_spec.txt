@@ -1,0 +1,10 @@
+You are implementing a differentially private mechanism in Python.
+
+{spec}
+
+Additional hard requirements:
+- Define exactly one top-level function named `{function_name}`.
+- The parameter `rng` is a numpy.random.Generator and must be the ONLY source of
+  randomness (never use numpy.random.* module functions, random, or fixed seeds).
+- Allowed imports: numpy, math. No other imports, no I/O, no printing.
+- Output ONLY a Python code block. No explanation before or after.
