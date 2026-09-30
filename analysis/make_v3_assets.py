@@ -224,6 +224,7 @@ def validation(paper, tasks):
         tier[t][1] += b["ours"]["status"] == "falsified"
     for t, name in ((1, "One"), (2, "Two"), (3, "Three")):
         m(f"NBugsTier{name}", tier[t][0]); m(f"NBugsTier{name}Caught", tier[t][1])
+        m(f"NBugsTier{name}Missed", tier[t][0] - tier[t][1])
 
     e2 = jl(P / "e2_random_pairs.jsonl")
     conf = {c["code_sha256"]: c["classification"] for c in jl(P / "confirm_seeds.jsonl")}
@@ -268,6 +269,7 @@ def repair():
         m("NEeightbOver", meas.get("over_noised", 0))
         m("NEeightbUnder", meas.get("under_noised", 0))
         m("NEeightbUnmeasurable", meas.get("unmeasurable", 0))
+        m("NEeightbOther", meas.get("other", 0))
         m("NEeightbMeasured", n - meas.get("unmeasurable", 0))
         a2 = s["by_arm"].get("A2", {})
         m("NEeightbFals", a2.get("falsified", 0))
