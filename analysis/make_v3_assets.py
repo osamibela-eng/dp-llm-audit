@@ -215,6 +215,7 @@ def validation(paper, tasks):
     m("NBugsCaught", caught); m("NBugsErr", err); m("NBugsMissed", len(det) - caught - err)
     m("PowerDet", pct(caught, len(det))); m("PowerDetCI", ci(caught, len(det)))
     m("NBugsVerdict", len(det) - err)
+    m("NBugsFailed", len(det) - caught)
     m("PowerVerdict", pct(caught, len(det) - err)); m("PowerVerdictCI", ci(caught, len(det) - err))
     m("NBugsLMCaught", sum(b["ours"]["status"] == "falsified" for b in lm))
     tier = collections.defaultdict(lambda: [0, 0])
