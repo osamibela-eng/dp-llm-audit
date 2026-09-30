@@ -181,6 +181,8 @@ def main_corpus(paper: pathlib.Path, tasks: dict):
     m("NSupport", support); m("SupportRate", pct(support, len(rep)))
     m("MedianEpsLB", f"{statistics.median(lbs):.1f}")
     m("NTwiceClaim", twice)
+    m("NReproWide", sum(r["counterexample"]["empirical_eps_lower_bound"] - r["falsified_at_eps"] >= 0.5
+                        for r in rep))
     m("MinEpsLB", f"{min(lbs):.2f}")
     one_off = collections.Counter(r["task_id"] for r in rows if r["outcome"] == "falsified"
                                   and conf.get((r["model"], r["task_id"], str(r["sample_idx"]))) == "one_off")
@@ -212,6 +214,7 @@ def validation(paper, tasks):
     m("NBugs", len(bugs)); m("NBugsDet", len(det)); m("NBugsLM", len(lm))
     m("NBugsCaught", caught); m("NBugsErr", err); m("NBugsMissed", len(det) - caught - err)
     m("PowerDet", pct(caught, len(det))); m("PowerDetCI", ci(caught, len(det)))
+    m("NBugsVerdict", len(det) - err)
     m("PowerVerdict", pct(caught, len(det) - err)); m("PowerVerdictCI", ci(caught, len(det) - err))
     m("NBugsLMCaught", sum(b["ours"]["status"] == "falsified" for b in lm))
     tier = collections.defaultdict(lambda: [0, 0])
